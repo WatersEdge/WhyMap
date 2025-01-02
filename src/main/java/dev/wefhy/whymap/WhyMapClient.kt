@@ -24,6 +24,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gl.ShaderProgram
+import net.minecraft.client.gl.ShaderProgramKeys
+import net.minecraft.client.gl.ShaderProgramKeys.POSITION_TEX_COLOR
+import net.minecraft.client.gl.ShaderProgramKeys.RENDERTYPE_GUI
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.render.BufferRenderer
@@ -44,7 +48,7 @@ import kotlin.random.Random
 
 class WhyMapClient : ClientModInitializer {
 
-    private fun BufferedImage.toNativeImage() = createNativeImage(width, height) { x, y -> 127 shl 24 or getColor(x, y) }
+    private fun BufferedImage.toNativeImage() = createNativeImage(width, height) { x, y -> 127 shl 24 or getColorArgb(x, y) }
 
     val nativeImageBackedTextures by lazy {  //TODO use better way of reusing native textures
         Array(4) { NativeImageBackedTexture(512, 512, false) }
@@ -308,7 +312,7 @@ class WhyMapClient : ClientModInitializer {
         val image = NativeImage(width, height, false)
         for (x in 0 until image.width) {
             for (y in 0 until image.height) {
-                image.setColor(x, y, image.block(x, y))
+                image.setColorArgb(x, y, image.block(x, y))
             }
         }
         return image
@@ -349,7 +353,8 @@ class WhyMapClient : ClientModInitializer {
         buffer.vertex(positionMatrix, -halfWidth, halfHeight, 0f).color(1f, 1f, 1f, 1f).texture(0f, 1f)
         buffer.vertex(positionMatrix, halfWidth, halfHeight, 0f).color(1f, 1f, 1f, 1f).texture(1f, 1f)
         buffer.vertex(positionMatrix, halfWidth, -halfHeight, 0f).color(1f, 1f, 1f, 1f).texture(1f, 0f)
-        RenderSystem.setShader { GameRenderer.getPositionTexColorProgram() }
+//        RenderSystem.setShader(MinecraftClient.getInstance().shaderLoader.getProgramToLoad(POSITION_TEX_COLOR))
+        RenderSystem.setShader(POSITION_TEX_COLOR)
         RenderSystem.setShaderTexture(0, textureId)
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
         BufferRenderer.drawWithGlobalProgram(buffer.end())
@@ -363,7 +368,8 @@ class WhyMapClient : ClientModInitializer {
         buffer.vertex(positionMatrix, 0f, height, 0f).color(1f, 1f, 1f, 1f).texture(0f, 1f)
         buffer.vertex(positionMatrix, width, height, 0f).color(1f, 1f, 1f, 1f).texture(1f, 1f)
         buffer.vertex(positionMatrix, width, 0f, 0f).color(1f, 1f, 1f, 1f).texture(1f, 0f)
-        RenderSystem.setShader { GameRenderer.getPositionTexColorProgram() }
+//        RenderSystem.setShader(MinecraftClient.getInstance().shaderLoader.getProgramToLoad(POSITION_TEX_COLOR))
+        RenderSystem.setShader(POSITION_TEX_COLOR)
         RenderSystem.setShaderTexture(0, textureId)
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
         BufferRenderer.drawWithGlobalProgram(buffer.end())

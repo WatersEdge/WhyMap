@@ -10,7 +10,7 @@ import net.minecraft.world.biome.Biome
 
 context(CurrentWorldProvider<CurrentWorld>)
 class BiomeCurrentWorldManager : BiomeManager() {
-    private val biomeRegistry = currentWorld.world.registryManager.get(RegistryKeys.BIOME)
+    private val biomeRegistry = currentWorld.world.registryManager.getOptional(RegistryKeys.BIOME).orElseThrow()
     private val biomeNameMap = biomeRegistry.entrySet.associate { it.key.value.path to it.value }
     private val biomeNameMapRev = biomeRegistry.entrySet.associate { it.value to it.key.value.path }
     private val biomeIdMap = biomeNameMap.entries.sortedBy { it.key }.map { it.value }.toTypedArray()
