@@ -58,3 +58,5 @@ out.txt
 threads_report.txt
 crashes/
 .kotlin/
+.aider*
+.env

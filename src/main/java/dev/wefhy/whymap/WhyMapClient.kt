@@ -24,14 +24,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gl.ShaderProgram
-import net.minecraft.client.gl.ShaderProgramKeys
 import net.minecraft.client.gl.ShaderProgramKeys.POSITION_TEX_COLOR
-import net.minecraft.client.gl.ShaderProgramKeys.RENDERTYPE_GUI
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.render.BufferRenderer
-import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.render.RenderTickCounter
 import net.minecraft.client.render.Tessellator
 import net.minecraft.client.render.VertexFormat
@@ -169,7 +165,16 @@ class WhyMapClient : ClientModInitializer {
                     (cropXsize * scaleX).toInt(),
                     (cropYsize * scaleY).toInt()
                 )
-                drawContext.fill(0, 0, mc.window.scaledWidth, mc.window.scaledHeight, 0xFF000000.toInt())
+                // TODO this works in 1.21.2 but draws over the map
+//                drawContext.fill(
+//                    (cropXstart).toInt(),
+//                    (cropYstart).toInt(),
+//                    ((cropXstart + cropXsize)).toInt(),
+//                    ((cropYstart + cropYsize)).toInt(),
+//                    0xFF000000.toInt()
+//                )
+                // TODO this draws the black background but broke in 1.21.2 and instead paints whole screen black
+//                drawContext.fill(0, 0, mc.window.scaledWidth, mc.window.scaledHeight, 0xFF000000.toInt())
             }
 
             matrixStack.push()
@@ -344,31 +349,18 @@ class WhyMapClient : ClientModInitializer {
     }
 
     fun drawCenter(matrixStack: MatrixStack, textureId: Identifier, width: Float, height: Float) {
-        val positionMatrix = matrixStack.peek().positionMatrix
-        val tessellator = Tessellator.getInstance()
-        val buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR)
-        val halfWidth = width * 0.5f
-        val halfHeight = height * 0.5f
-        buffer.vertex(positionMatrix, -halfWidth, -halfHeight, 0f).color(1f, 1f, 1f, 1f).texture(0f, 0f)
-        buffer.vertex(positionMatrix, -halfWidth, halfHeight, 0f).color(1f, 1f, 1f, 1f).texture(0f, 1f)
-        buffer.vertex(positionMatrix, halfWidth, halfHeight, 0f).color(1f, 1f, 1f, 1f).texture(1f, 1f)
-        buffer.vertex(positionMatrix, halfWidth, -halfHeight, 0f).color(1f, 1f, 1f, 1f).texture(1f, 0f)
-//        RenderSystem.setShader(MinecraftClient.getInstance().shaderLoader.getProgramToLoad(POSITION_TEX_COLOR))
-        RenderSystem.setShader(POSITION_TEX_COLOR)
-        RenderSystem.setShaderTexture(0, textureId)
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
-        BufferRenderer.drawWithGlobalProgram(buffer.end())
+        draw(matrixStack, textureId, width, height, -(width * 0.5f), -(height * 0.5f))
     }
 
-    fun draw(matrixStack: MatrixStack, textureId: Identifier, width: Float, height: Float) {
+    fun draw(matrixStack: MatrixStack, textureId: Identifier, width: Float, height: Float, xOffset: Float = 0f, yOffset: Float = 0f) {
+//        println("draw() called with: matrixStack = ${matrixStack}, textureId = $textureId, width = $width, height = $height")
         val positionMatrix = matrixStack.peek().positionMatrix
         val tessellator = Tessellator.getInstance()
         val buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR)
-        buffer.vertex(positionMatrix, 0f, 0f, 0f).color(1f, 1f, 1f, 1f).texture(0f, 0f)
-        buffer.vertex(positionMatrix, 0f, height, 0f).color(1f, 1f, 1f, 1f).texture(0f, 1f)
-        buffer.vertex(positionMatrix, width, height, 0f).color(1f, 1f, 1f, 1f).texture(1f, 1f)
-        buffer.vertex(positionMatrix, width, 0f, 0f).color(1f, 1f, 1f, 1f).texture(1f, 0f)
-//        RenderSystem.setShader(MinecraftClient.getInstance().shaderLoader.getProgramToLoad(POSITION_TEX_COLOR))
+        buffer.vertex(positionMatrix, xOffset, yOffset, 0f).color(1f, 1f, 1f, 1f).texture(0f, 0f)
+        buffer.vertex(positionMatrix, xOffset, yOffset + height, 0f).color(1f, 1f, 1f, 1f).texture(0f, 1f)
+        buffer.vertex(positionMatrix, xOffset + width, yOffset + height, 0f).color(1f, 1f, 1f, 1f).texture(1f, 1f)
+        buffer.vertex(positionMatrix, xOffset + width, yOffset, 0f).color(1f, 1f, 1f, 1f).texture(1f, 0f)
         RenderSystem.setShader(POSITION_TEX_COLOR)
         RenderSystem.setShaderTexture(0, textureId)
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
