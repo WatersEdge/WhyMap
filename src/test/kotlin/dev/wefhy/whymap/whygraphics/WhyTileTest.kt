@@ -1,5 +1,6 @@
 package dev.wefhy.whymap.whygraphics
 
+import dev.wefhy.whymap.utils.getColorArgb
 import net.minecraft.client.texture.NativeImage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -122,7 +123,7 @@ class WhyTileTest {
                 else
                     WhyColor(0.0f, 0.0f, 0.0f, 0.0f)
 
-                val resultColor = WhyColor.fromARGB(nativeImage.getColor(x, y))
+                val resultColor = WhyColor.fromARGB(nativeImage.getColorArgb(x, y))
                 assertEquals((expectedColor.r * 255).toInt(), (resultColor.r * 255).toInt())
                 assertEquals((expectedColor.g * 255).toInt(), (resultColor.g * 255).toInt())
                 assertEquals((expectedColor.b * 255).toInt(), (resultColor.b * 255).toInt())

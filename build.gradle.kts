@@ -356,20 +356,7 @@ fun ByteArray.toHex(): String {
 }
 
 
-fun getCurrentVersion(): String {
-	val stdout = ByteArrayOutputStream()
-	runCatching {
-		exec {
-			// Use git directly so Windows builds don't need /bin/sh; ignore if git is missing
-			commandLine("git", "describe", "--tags")
-			isIgnoreExitValue = true
-			standardOutput = stdout
-		}
-	}.onFailure {
-		logger.lifecycle("git describe unavailable, falling back to 0.0.0")
-	}
-	return stdout.toString().trim().ifBlank { "0.0.0" }
-}
+fun getCurrentVersion(): String = "1.0.1"
 
 //abstract class YarnServeTask : DefaultTask() {
 //	@TaskAction

@@ -3,6 +3,7 @@
 package dev.wefhy.whymap.whygraphics
 
 import dev.wefhy.whymap.utils.ExpensiveCall
+import dev.wefhy.whymap.utils.setColorArgb
 import net.minecraft.client.texture.NativeImage
 import java.awt.image.BufferedImage
 import java.awt.image.WritableRaster
@@ -93,7 +94,7 @@ open class WhyTile(val data: Array<WhyColor> = Array(arraySize) { WhyColor.Trans
         for (y in yOffset until yOffset + chunkSize) {
             for (x in xOffset until xOffset + chunkSize) {
                 val color = data[i++]
-                nativeImage.setColor(x, y, color.intARGB)
+                nativeImage.setColorArgb(x, y, color.intARGB)
             }
         }
     }

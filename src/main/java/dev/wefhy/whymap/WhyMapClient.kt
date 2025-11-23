@@ -266,7 +266,11 @@ class WhyMapClient : ClientModInitializer {
                 mc.setScreen(getConfigScreen(null))
             }
             if (kbFullMap.wasPressed()) {
-                mc.setScreen(FullMapScreen())
+                if (mc.currentScreen is FullMapScreen) {
+                    mc.setScreen(null)
+                } else {
+                    mc.setScreen(FullMapScreen())
+                }
             }
 
             //TODO https://discord.com/channels/507304429255393322/807617488313516032/895854464060227665

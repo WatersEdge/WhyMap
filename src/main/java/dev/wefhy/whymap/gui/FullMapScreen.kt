@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import dev.wefhy.whymap.WhyMapMod.Companion.activeWorld
 import dev.wefhy.whymap.config.WhyMapConfig
 import dev.wefhy.whymap.config.WhyUserSettings
+import dev.wefhy.whymap.WhyMapClient
 import dev.wefhy.whymap.utils.LocalTile
 import dev.wefhy.whymap.utils.TileZoom
 import kotlinx.coroutines.runBlocking
@@ -14,6 +15,7 @@ import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.render.Tessellator
 import net.minecraft.client.render.VertexFormat
 import net.minecraft.client.render.VertexFormats
+import net.minecraft.client.util.InputUtil
 import net.minecraft.client.texture.NativeImageBackedTexture
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Text
@@ -45,6 +47,15 @@ class FullMapScreen : Screen(Text.of("WhyMap")) {
         regionTextures.values.forEach { it.close() }
         regionTextures.clear()
         super.close()
+    }
+
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        val mc = client ?: return super.keyPressed(keyCode, scanCode, modifiers)
+        if (WhyMapClient.kbFullMap.matchesKey(keyCode, scanCode) || keyCode == InputUtil.GLFW_KEY_ESCAPE) {
+            mc.setScreen(null)
+            return true
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
     override fun render(drawContext: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
@@ -110,6 +121,8 @@ class FullMapScreen : Screen(Text.of("WhyMap")) {
 
         mc.player?.let { player ->
             val (px, pz) = blockToScreen(player.x, player.z)
+            // Bright dot plus arrow for clarity
+            drawContext.fill((px - 2).toInt(), (pz - 2).toInt(), (px + 2).toInt(), (pz + 2).toInt(), 0xFF00FF00.toInt())
             drawPlayerArrow(drawContext, px, pz, player.yaw)
         }
 

@@ -744,5 +744,7 @@ class MapArea private constructor(val location: LocalTileRegion) {
         context(CurrentWorldProvider<WhyWorld>)
         fun GetForWrite(position: LocalTileRegion) = MapArea(position)
 
+        private val defaultWaterColor = WhyColor(0.12f, 0.45f, 0.95f, 1f)
+
     }
 }
