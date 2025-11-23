@@ -3,6 +3,7 @@
 package dev.wefhy.whymap.tiles.region
 
 import dev.wefhy.whymap.CurrentWorldProvider
+import dev.wefhy.whymap.WhyMapMod
 import dev.wefhy.whymap.WhyMapMod.Companion.LOGGER
 import dev.wefhy.whymap.WhyWorld
 import dev.wefhy.whymap.communication.BlockData
@@ -633,6 +634,12 @@ class MapArea private constructor(val location: LocalTileRegion) {
         val normal = normalFinder(x, z)
         val depth = depthMap[z][x].toUByte()
 
+        if (debugWater && x % 32 == 0 && z % 32 == 0) {
+            LOGGER.info(
+                "WaterDebug region=(${location.x},${location.z}) local=($x,$z) block=${block.block.translationKey} overlay=${overlayBlock.block.translationKey} depth=$depth biomeWater=${biomeManager.decodeBiomeWaterColor(biomeId).hexRGB} overlayColor=${overlayBlockColor.hexRGB}"
+            )
+        }
+
         var color = (if (foliageBlocksSet.contains(block)) {
             baseBlockColor * foliageColor
         } else baseBlockColor) * normal.shade
@@ -745,6 +752,7 @@ class MapArea private constructor(val location: LocalTileRegion) {
         fun GetForWrite(position: LocalTileRegion) = MapArea(position)
 
         private val defaultWaterColor = WhyColor(0.12f, 0.45f, 0.95f, 1f)
+        private val debugWater = System.getProperty("whymap.debug.water") == "true"
 
     }
 }
