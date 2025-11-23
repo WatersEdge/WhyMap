@@ -122,7 +122,7 @@ class WhyTileTest {
                 else
                     WhyColor(0.0f, 0.0f, 0.0f, 0.0f)
 
-                val resultColor = WhyColor.fromARGB(nativeImage.getColorArgb(x, y))
+                val resultColor = WhyColor.fromARGB(nativeImage.getColor(x, y))
                 assertEquals((expectedColor.r * 255).toInt(), (resultColor.r * 255).toInt())
                 assertEquals((expectedColor.g * 255).toInt(), (resultColor.g * 255).toInt())
                 assertEquals((expectedColor.b * 255).toInt(), (resultColor.b * 255).toInt())

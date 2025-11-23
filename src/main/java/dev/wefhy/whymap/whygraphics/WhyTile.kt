@@ -93,7 +93,7 @@ open class WhyTile(val data: Array<WhyColor> = Array(arraySize) { WhyColor.Trans
         for (y in yOffset until yOffset + chunkSize) {
             for (x in xOffset until xOffset + chunkSize) {
                 val color = data[i++]
-                nativeImage.setColorArgb(x, y, color.intARGB)
+                nativeImage.setColor(x, y, color.intARGB)
             }
         }
     }
@@ -172,4 +172,3 @@ open class WhyTile(val data: Array<WhyColor> = Array(arraySize) { WhyColor.Trans
         }
     }
 }
-

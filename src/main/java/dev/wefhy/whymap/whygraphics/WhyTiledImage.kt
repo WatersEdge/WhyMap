@@ -96,10 +96,9 @@ class WhyTiledImage(
 
     companion object {
 
-        val sharedNativeImages = mutableMapOf<Pair<Int, Int>, NativeImage>()
-
-        fun getSharedNativeImage(width: Int, height: Int): NativeImage = synchronized(Unit) {
-            return sharedNativeImages.getOrPut(width to height) { NativeImage(width, height, false) }
+        fun getSharedNativeImage(width: Int, height: Int): NativeImage {
+            // 1.21.x NativeImage can be closed by downstream consumers; allocate fresh to avoid "Image is not allocated"
+            return NativeImage(width, height, false)
         }
 
         fun BuildForRegion(builder: (y: Int, x: Int) -> WhyColor): WhyTiledImage {

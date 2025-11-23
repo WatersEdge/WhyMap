@@ -62,6 +62,8 @@ val extraLibs: Configuration by configurations.creating
 
 val isReleaseBuild = false
 val experimentalOptimizations = false
+val hasVueFrontend = file("src-vue/package.json").exists()
+val hasThreeFrontend = file("src-threejs/package.json").exists()
 
 dependencies {
 	minecraft("com.mojang", "minecraft", minecraft_version)
@@ -166,6 +168,7 @@ val yarnBuild = task<Exec>("yarnBuild") {
 	outputs.dir("src-vue/dist")
 	workingDir = file("src-vue")
 	commandLine("yarn", "build")
+	onlyIf { hasVueFrontend }
 }
 
 val threeBuild = task<Exec>("threeBuild") {
@@ -175,30 +178,35 @@ val threeBuild = task<Exec>("threeBuild") {
 	outputs.dir("src-threejs/dist")
 	workingDir = file("src-threejs")
 	commandLine("npm", "run", "build")
+	onlyIf { hasThreeFrontend }
 }
 
 val copyDistFolder = tasks.register<Copy>("copyDistFolder") {
 	from(file("src-vue/dist"))
 	into(file("src/main/resources/web"))
 	exclude("*.js.map")
+	onlyIf { hasVueFrontend }
 }
 
 val copyThreeJsFolder = tasks.register<Copy>("copyThreeJsFolder") {
 	from(file("src-threejs/dist"))
 	into(file("src/main/resources/three"))
 	exclude("*.js.map")
+	onlyIf { hasThreeFrontend }
 }
 
 val deleteOldWeb = tasks.register<Delete>("deleteOldWeb") {
 //	delete(files("src/main/resources/web/css"))
 //	delete(files("src/main/resources/web/js"))
 	delete(files("src/main/resources/web/assets"))
+	onlyIf { hasVueFrontend }
 }
 
 val deleteOldThree = tasks.register<Delete>("deleteOldThree") {
 //	delete(files("src/main/resources/three/css"))
 //	delete(files("src/main/resources/three/js"))
 	delete(files("src/main/resources/three/assets"))
+	onlyIf { hasThreeFrontend }
 }
 
 val yarnInstall = task<Exec>("yarnInstall") {
@@ -206,6 +214,7 @@ val yarnInstall = task<Exec>("yarnInstall") {
 	outputs.dir("src-vue/node_modules")
 	workingDir = file("src-vue")
 	commandLine("yarn", "install")
+	onlyIf { hasVueFrontend }
 }
 
 val npmInstall = task<Exec>("npmInstall") {
@@ -213,6 +222,7 @@ val npmInstall = task<Exec>("npmInstall") {
 	outputs.dir("src-threejs/node_modules")
 	workingDir = file("src-threejs")
 	commandLine("npm", "install")
+	onlyIf { hasThreeFrontend }
 }
 
 val md = MessageDigest.getInstance("MD5")!!
@@ -348,13 +358,17 @@ fun ByteArray.toHex(): String {
 
 fun getCurrentVersion(): String {
 	val stdout = ByteArrayOutputStream()
-	exec {
-		executable("/bin/sh")
-		args("-c", "echo `git describe --tags`")
-//		commandLine("git", "describe", "--tags")
-		standardOutput = stdout
+	runCatching {
+		exec {
+			// Use git directly so Windows builds don't need /bin/sh; ignore if git is missing
+			commandLine("git", "describe", "--tags")
+			isIgnoreExitValue = true
+			standardOutput = stdout
+		}
+	}.onFailure {
+		logger.lifecycle("git describe unavailable, falling back to 0.0.0")
 	}
-	return stdout.toString().trim()
+	return stdout.toString().trim().ifBlank { "0.0.0" }
 }
 
 //abstract class YarnServeTask : DefaultTask() {
@@ -379,18 +393,18 @@ tasks.withType(Exec::class.java).configureEach {
 
 tasks {
 	"runClient" {
-		dependsOn(copyDistFolder)
-		dependsOn(copyThreeJsFolder)
+		if (hasVueFrontend) dependsOn(copyDistFolder)
+		if (hasThreeFrontend) dependsOn(copyThreeJsFolder)
 	}
 	"build" {
-		dependsOn(copyDistFolder)
-		dependsOn(copyThreeJsFolder)
+		if (hasVueFrontend) dependsOn(copyDistFolder)
+		if (hasThreeFrontend) dependsOn(copyThreeJsFolder)
 		dependsOn(createDiscordMessage)
 		dependsOn(newMappings)
 	}
 	"processResources" {
-		dependsOn(copyDistFolder)
-		dependsOn(copyThreeJsFolder)
+		if (hasVueFrontend) dependsOn(copyDistFolder)
+		if (hasThreeFrontend) dependsOn(copyThreeJsFolder)
 		dependsOn(blockMappingsList)
 		dependsOn(biomeMappingsList)
 	}

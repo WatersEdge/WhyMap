@@ -3,6 +3,7 @@
 package dev.wefhy.whymap
 
 import dev.wefhy.whymap.WhyMapClient.Companion.kbModSettings
+import dev.wefhy.whymap.WhyMapClient.Companion.kbFullMap
 import dev.wefhy.whymap.config.FileConfigManager
 import dev.wefhy.whymap.config.WhyMapConfig.DEV_VERSION
 import dev.wefhy.whymap.config.WhyMapConfig.mapLink
@@ -131,7 +132,7 @@ class WhyMapMod : ModInitializer {
 
             val message = Text.literal("WhyMap: see your map at ") + Text.literal(mapLink).apply {
                 style = style.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, mapLink)).withUnderline(true)
-            } + Text.literal(" or press  ${kbModSettings.boundKeyLocalizedText} to new in-game map!")
+            } + Text.literal(" or press ${kbFullMap.boundKeyLocalizedText} for the in-game map (settings: ${kbModSettings.boundKeyLocalizedText}).")
 //            } + Text.literal(" or press ${KeyBindingHelper.getBoundKeyOf(kbModSettings)} to open map")
             client.player!!.sendMessage(message, false)
             WorldEventQueue.addUpdate(WorldEventQueue.WorldEvent.EnterWorld)

@@ -8,12 +8,15 @@ import dev.wefhy.whymap.clothconfig.ConfigEntryPoint.getConfigScreen
 import dev.wefhy.whymap.config.UserSettings.MinimapPosition
 import dev.wefhy.whymap.config.WhyUserSettings
 import dev.wefhy.whymap.events.FeatureUpdateQueue
+import dev.wefhy.whymap.gui.FullMapScreen
 import dev.wefhy.whymap.gui.WhyInputScreen
 import dev.wefhy.whymap.hud.Hud
 import dev.wefhy.whymap.hud.WhyHud
 import dev.wefhy.whymap.utils.LocalTile.Companion.Block
 import dev.wefhy.whymap.utils.LocalTile.Companion.Region
 import dev.wefhy.whymap.utils.TileZoom
+import dev.wefhy.whymap.utils.getColorArgb
+import dev.wefhy.whymap.utils.setColorArgb
 import dev.wefhy.whymap.waypoints.CoordXYZ
 import dev.wefhy.whymap.waypoints.LocalWaypoint
 import kotlinx.coroutines.GlobalScope
@@ -24,10 +27,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gl.ShaderProgramKeys.POSITION_TEX_COLOR
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.render.BufferRenderer
+import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.render.RenderTickCounter
 import net.minecraft.client.render.Tessellator
 import net.minecraft.client.render.VertexFormat
@@ -262,6 +265,9 @@ class WhyMapClient : ClientModInitializer {
             if (kbModSettings.wasPressed()) {
                 mc.setScreen(getConfigScreen(null))
             }
+            if (kbFullMap.wasPressed()) {
+                mc.setScreen(FullMapScreen())
+            }
 
             //TODO https://discord.com/channels/507304429255393322/807617488313516032/895854464060227665
 
@@ -361,7 +367,7 @@ class WhyMapClient : ClientModInitializer {
         buffer.vertex(positionMatrix, xOffset, yOffset + height, 0f).color(1f, 1f, 1f, 1f).texture(0f, 1f)
         buffer.vertex(positionMatrix, xOffset + width, yOffset + height, 0f).color(1f, 1f, 1f, 1f).texture(1f, 1f)
         buffer.vertex(positionMatrix, xOffset + width, yOffset, 0f).color(1f, 1f, 1f, 1f).texture(1f, 0f)
-        RenderSystem.setShader(POSITION_TEX_COLOR)
+        RenderSystem.setShader(GameRenderer::getPositionTexColorProgram)
         RenderSystem.setShaderTexture(0, textureId)
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
         BufferRenderer.drawWithGlobalProgram(buffer.end())
@@ -389,6 +395,14 @@ class WhyMapClient : ClientModInitializer {
                 "key.whymap.modsettings",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_M,
+                "category.whymap"
+            )
+        )
+        val kbFullMap = KeyBindingHelper.registerKeyBinding(
+            KeyBinding(
+                "key.whymap.fullmap",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_G,
                 "category.whymap"
             )
         )
